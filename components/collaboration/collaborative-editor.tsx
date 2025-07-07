@@ -11,7 +11,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { 
   Users, 
   MessageSquare, 
-  Share2,
   UserPlus,
   Crown,
   Eye,
@@ -21,9 +20,7 @@ import {
   Clock,
   Send,
   MoreVertical,
-  Bell,
-  BellOff,
-  Settings
+  CheckCircle
 } from 'lucide-react'
 import { RichTextEditor } from '@/components/editor/rich-text-editor'
 import type { 
@@ -31,7 +28,7 @@ import type {
   Collaborator, 
   Comment, 
   Change,
-  PermissionLevel 
+  CollaboratorRole 
 } from '@/types'
 
 interface CollaborativeEditorProps {
@@ -59,14 +56,15 @@ export function CollaborativeEditor({
   onContentChange,
   onSave
 }: CollaborativeEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null)
+  const _editorRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLInputElement>(null)
   
-  const [session, setSession] = useState<CollaborativeSession>({
+  const [_session, _setSession] = useState<CollaborativeSession>({
     id: `session-${storyId}`,
     storyId,
     participants: [],
     createdAt: new Date(),
+    lastActivity: new Date(),
     isActive: true
   })
   
@@ -79,11 +77,13 @@ export function CollaborativeEditor({
   
   const [collaborators, setCollaborators] = useState<Collaborator[]>([
     {
-      id: userId,
+      userId: userId,
       name: 'You',
       email: 'you@example.com',
       avatar: '/placeholder-avatar.jpg',
       role: isOwner ? 'owner' : 'editor',
+      permissions: [],
+      joinedAt: new Date(),
       isOnline: true,
       lastSeen: new Date(),
       cursor: { position: 0, color: '#3b82f6' }
@@ -92,7 +92,7 @@ export function CollaborativeEditor({
   
   const [comments, setComments] = useState<Comment[]>([])
   const [changes, setChanges] = useState<Change[]>([])
-  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [chatMessages, setChatMessages] = useState<Comment[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [showChat, setShowChat] = useState(false)
   const [showComments, setShowComments] = useState(false)
@@ -104,21 +104,25 @@ export function CollaborativeEditor({
     // Mock WebSocket connection for real-time collaboration
     const mockCollaborators: Collaborator[] = [
       {
-        id: 'user-2',
+        userId: 'user-2',
         name: 'Sarah Mitchell',
         email: 'sarah@example.com',
         avatar: '/placeholder-avatar-2.jpg',
         role: 'editor',
+        permissions: [],
+        joinedAt: new Date(),
         isOnline: true,
         lastSeen: new Date(),
         cursor: { position: 150, color: '#ef4444' }
       },
       {
-        id: 'user-3',
+        userId: 'user-3',
         name: 'Alex Chen',
         email: 'alex@example.com',
         avatar: '/placeholder-avatar-3.jpg',
         role: 'viewer',
+        permissions: [],
+        joinedAt: new Date(),
         isOnline: false,
         lastSeen: new Date(Date.now() - 300000), // 5 minutes ago
         cursor: { position: 0, color: '#10b981' }
@@ -128,6 +132,8 @@ export function CollaborativeEditor({
     const mockComments: Comment[] = [
       {
         id: 'comment-1',
+        authorId: 'user-2',
+        authorName: 'Sarah Mitchell',
         userId: 'user-2',
         userName: 'Sarah Mitchell',
         content: 'I love this description! Maybe we could add more sensory details?',
@@ -137,6 +143,8 @@ export function CollaborativeEditor({
       },
       {
         id: 'comment-2',
+        authorId: 'user-3',
+        authorName: 'Alex Chen',
         userId: 'user-3',
         userName: 'Alex Chen',
         content: 'This character development is really strong.',
@@ -151,9 +159,12 @@ export function CollaborativeEditor({
     const mockChanges: Change[] = [
       {
         id: 'change-1',
+        authorId: 'user-2',
         userId: 'user-2',
         userName: 'Sarah Mitchell',
         type: 'edit',
+        content: 'The character walked silently, pondering the mysterious message.',
+        position: 100,
         description: 'Added dialogue to scene 3',
         timestamp: new Date(Date.now() - 180000),
         before: 'The character walked silently.',
@@ -161,9 +172,12 @@ export function CollaborativeEditor({
       },
       {
         id: 'change-2',
+        authorId: userId,
         userId: userId,
         userName: 'You',
         type: 'addition',
+        content: 'A new chapter in their adventure was about to begin.',
+        position: 200,
         description: 'Added new paragraph',
         timestamp: new Date(Date.now() - 240000),
         before: '',
@@ -187,9 +201,12 @@ export function CollaborativeEditor({
   const broadcastChange = (type: Change['type'], description: string, before: string, after: string) => {
     const change: Change = {
       id: `change-${Date.now()}`,
+      authorId: userId,
       userId,
       userName: 'You',
       type,
+      content: after,
+      position: 0,
       description,
       timestamp: new Date(),
       before,
@@ -199,9 +216,11 @@ export function CollaborativeEditor({
     setChanges(prev => [change, ...prev])
   }
 
-  const addComment = (position: number, content: string) => {
+  const _addComment = (position: number, content: string) => {
     const comment: Comment = {
       id: `comment-${Date.now()}`,
+      authorId: userId,
+      authorName: 'You',
       userId,
       userName: 'You',
       content,
@@ -229,12 +248,16 @@ export function CollaborativeEditor({
   const sendChatMessage = () => {
     if (!newMessage.trim()) return
     
-    const message = {
+    const message: Comment = {
       id: `msg-${Date.now()}`,
-      userId,
-      userName: 'You',
+      authorId: userId,
+      authorName: 'You',
       content: newMessage,
-      timestamp: new Date()
+      position: 0,
+      timestamp: new Date(),
+      resolved: false,
+      userId,
+      userName: 'You'
     }
     
     setChatMessages(prev => [...prev, message])
@@ -246,11 +269,13 @@ export function CollaborativeEditor({
     
     // Mock invitation
     const newCollaborator: Collaborator = {
-      id: `user-${Date.now()}`,
+      userId: `user-${Date.now()}`,
       name: inviteEmail.split('@')[0],
       email: inviteEmail,
       avatar: '/placeholder-avatar.jpg',
       role: 'editor',
+      permissions: [],
+      joinedAt: new Date(),
       isOnline: false,
       lastSeen: new Date(),
       cursor: { position: 0, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
@@ -261,16 +286,16 @@ export function CollaborativeEditor({
     setShowInviteDialog(false)
   }
 
-  const changePermission = (collaboratorId: string, newRole: PermissionLevel) => {
+  const changePermission = (collaboratorId: string, newRole: CollaboratorRole) => {
     setCollaborators(prev => prev.map(collab =>
-      collab.id === collaboratorId
+      collab.userId === collaboratorId
         ? { ...collab, role: newRole }
         : collab
     ))
   }
 
   const lockEditor = () => {
-    const currentUser = collaborators.find(c => c.id === userId)
+    const currentUser = collaborators.find(c => c.userId === userId)
     setEditorState(prev => ({
       ...prev,
       isLocked: true,
@@ -314,7 +339,7 @@ export function CollaborativeEditor({
                   <div className="flex -space-x-2">
                     {onlineCollaborators.slice(0, 5).map((collaborator) => (
                       <Avatar 
-                        key={collaborator.id} 
+                        key={collaborator.userId} 
                         className="w-8 h-8 border-2 border-white dark:border-gray-800"
                       >
                         <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
@@ -445,7 +470,7 @@ export function CollaborativeEditor({
             <ScrollArea className="h-32">
               <div className="space-y-2">
                 {collaborators.map((collaborator) => (
-                  <div key={collaborator.id} className="flex items-center justify-between">
+                  <div key={collaborator.userId} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="relative">
                         <Avatar className="w-6 h-6">
@@ -469,7 +494,7 @@ export function CollaborativeEditor({
                       </div>
                     </div>
                     
-                    {isOwner && collaborator.id !== userId && (
+                    {isOwner && collaborator.userId !== userId && (
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -481,7 +506,7 @@ export function CollaborativeEditor({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => changePermission(collaborator.id, 'editor')}
+                              onClick={() => changePermission(collaborator.userId, 'editor')}
                               className="w-full justify-start"
                             >
                               <Edit className="w-3 h-3 mr-2" />
@@ -490,7 +515,7 @@ export function CollaborativeEditor({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => changePermission(collaborator.id, 'viewer')}
+                              onClick={() => changePermission(collaborator.userId, 'viewer')}
                               className="w-full justify-start"
                             >
                               <Eye className="w-3 h-3 mr-2" />

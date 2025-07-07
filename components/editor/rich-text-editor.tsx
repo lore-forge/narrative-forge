@@ -26,7 +26,7 @@ import {
   Undo,
   Redo,
   Type,
-  Palette
+  // Palette
 } from 'lucide-react'
 import { AIAssistant } from '@/components/ai/ai-assistant'
 
@@ -366,7 +366,6 @@ export function RichTextEditor({
         {isAIAssistantOpen && (
           <AIAssistant
             context={context}
-            currentText={getSelectedText() || editorState.content}
             onSuggestion={(suggestion) => {
               const selection = getSelectedText()
               if (selection) {
@@ -375,7 +374,6 @@ export function RichTextEditor({
                 execCommand('insertHTML', `<p>${suggestion}</p>`)
               }
             }}
-            placeholder="Select text and ask for improvements, or describe what you want to write..."
           />
         )}
 

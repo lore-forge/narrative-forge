@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     
     try {
       decodedToken = await adminAuth.verifyIdToken(token)
-    } catch (authError) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid authentication token' },
         { status: 401 }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     let storyRequest: StoryGenerationRequest
     try {
       storyRequest = await request.json()
-    } catch (parseError) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid request format' },
         { status: 400 }
@@ -75,18 +75,49 @@ export async function POST(request: NextRequest) {
       includeInteractive: storyRequest.includeInteractive ?? true,
     }
 
-    // Generate story using ai-services client with caching
+    // Generate story using the new definitive AI services client
     console.log(`🎭 Generating story for user ${decodedToken.uid}`)
     console.log(`📚 Prompt: ${storyRequest.initialPrompt.slice(0, 100)}...`)
     console.log(`🎯 Target: ${storyRequest.targetAudience}, Genre: ${storyRequest.genre}`)
-    console.log(`🚀 Using ai-services with caching optimization`)
+    console.log(`🚀 Using definitive AI services client`)
 
     const startTime = Date.now()
-    const generatedStory = await narrativeAIClient.generateStory(enhancedRequest)
+    
+    // Map the old request format to the new client's expected format
+    const generatedStory = await narrativeAIClient.generateStory({
+      initialPrompt: enhancedRequest.initialPrompt,
+      genre: enhancedRequest.genre,
+      targetAudience: enhancedRequest.targetAudience,
+      length: enhancedRequest.length as 'short' | 'medium' | 'long' | 'novel',
+      chapterCount: enhancedRequest.chapterCount,
+      characters: enhancedRequest.characters?.map(char => ({
+        id: char.id,
+        name: char.name,
+        role: char.narrativeRole,
+        description: char.description
+      })),
+      worldContext: enhancedRequest.worldContext ? {
+        setting: enhancedRequest.worldContext.name || 'Fantasy World',
+        timeframe: enhancedRequest.worldContext.timeline?.length > 0 
+          ? `${enhancedRequest.worldContext.timeline[0].date} - ${enhancedRequest.worldContext.timeline[enhancedRequest.worldContext.timeline.length - 1].date}`
+          : 'Present',
+        worldDetails: enhancedRequest.worldContext.description || ''
+      } : undefined,
+      skillTargets: enhancedRequest.skillTargets?.map(target => ({
+        skill: target.skill,
+        currentLevel: target.level || 1,
+        targetLevel: (target.level || 1) + 1
+      })),
+      educationalGoals: enhancedRequest.educationalGoals,
+      includeImages: enhancedRequest.includeImages,
+      includeAudio: enhancedRequest.includeAudio,
+      includeInteractive: enhancedRequest.includeInteractive
+    })
+    
     const processingTime = Date.now() - startTime
 
     console.log(`✅ Story generated successfully in ${processingTime}ms`)
-    console.log(`📊 Chapters: ${generatedStory.chapters.length}, Words: ${generatedStory.metadata.wordCount}`)
+    console.log(`📊 Chapters: ${generatedStory.chapters.length}, Length: ${generatedStory.metadata.length}`)
     console.log(`🎯 AI Services: Cache optimization enabled`)
 
     // Add user metadata
@@ -107,7 +138,7 @@ export async function POST(request: NextRequest) {
         safety: {
           contentFiltered: true,
           ageAppropriate: true,
-          educationalValue: generatedStory.metadata.educationalValue
+          educationalValue: generatedStory.metadata.educationalLevel || 'appropriate'
         }
       }
     })

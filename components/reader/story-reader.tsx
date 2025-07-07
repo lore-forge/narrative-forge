@@ -452,7 +452,7 @@ export function StoryReader({
                               className="block w-full text-left p-2 border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                               style={{ borderColor: themeStyles.borderColor }}
                             >
-                              {choice}
+                              {choice.text}
                             </button>
                           ))}
                         </div>

@@ -1,9 +1,18 @@
+/**
+ * @deprecated This service contains functionality that is not supported by the current AI Services backend.
+ * The functionality in this file has been documented in MISSING_BACKEND_ENDPOINTS.md
+ * Use the definitive AI services client (lib/ai-services-client.ts) instead.
+ */
+
+// Commenting out imports that don't exist in the current backend
+/*
 import { 
   FirebaseCacheManager, 
   VertexAIService,
   AIServicesClient,
   GoogleCloudAuthenticator 
 } from 'lore-forge-ai-services'
+*/
 import { v4 as uuid } from 'uuid'
 import type {
   StoryGenerationRequest,
@@ -13,17 +22,53 @@ import type {
   PlotStructure,
   StoryCharacter,
   WorldContext,
-  EnhancedPrompt,
-  PlotAnalysis,
-  SkillLevel,
-  AdaptedStory,
-  StoryMetadata
+  // EnhancedPrompt, // These types don't exist - documented in MISSING_BACKEND_ENDPOINTS.md
+  // PlotAnalysis,
+  // SkillLevel,
+  // AdaptedStory,
+  // StoryMetadata
 } from '@/types'
 
+// Temporary type definitions to prevent build errors
+interface EnhancedPrompt {
+  originalPrompt: string;
+  enhancedPrompt: string;
+  contextElements: string[];
+  estimatedComplexity: number;
+}
+
+interface PlotAnalysis {
+  plotStructure: any;
+  characterArcs: any[];
+  themes: any[];
+  educationalValue: number;
+  suggestions: string[];
+}
+
+interface AdaptedStory extends GeneratedStory {
+  adaptations: Array<{
+    type: string;
+    description: string;
+  }>;
+  originalComplexity: number;
+  targetComplexity: number;
+}
+
+interface StoryMetadata {
+  wordCount: number;
+  estimatedReadingTime: number;
+  complexity: number;
+  themes: string[];
+  contentWarnings: string[];
+  educationalValue: number;
+}
+
+type SkillLevel = 'beginner' | 'elementary' | 'intermediate' | 'advanced' | 'expert';
+
 export class VertexAINarrativeService {
-  private cacheManager: FirebaseCacheManager
-  private vertexAIService: VertexAIService
-  private aiServicesClient: AIServicesClient
+  private cacheManager: any // FirebaseCacheManager - not available in current backend
+  private vertexAIService: any // VertexAIService - not available in current backend
+  private aiServicesClient: any // AIServicesClient - not available in current backend
   private projectId: string
   private location: string
   private model: string
@@ -33,7 +78,9 @@ export class VertexAINarrativeService {
     this.location = process.env.VERTEX_AI_LOCATION || 'us-central1'
     this.model = process.env.NARRATIVE_AI_MODEL || 'gemini-1.5-pro'
     
-    // Initialize ai-services components
+    // Initialize ai-services components - disabled until backend supports them
+    console.warn('VertexAINarrativeService is deprecated. Use aiServicesClient instead.')
+    /*
     this.cacheManager = FirebaseCacheManager.getInstance()
     const authenticator = new GoogleCloudAuthenticator()
     this.vertexAIService = new VertexAIService(authenticator)
@@ -42,6 +89,7 @@ export class VertexAINarrativeService {
                process.env.CLOUD_CHARACTER_CREATION_FULLURL?.replace('character-creator', 'narrative-generator'),
       timeout: 60000
     })
+    */
   }
 
   /**
@@ -491,9 +539,9 @@ export class VertexAINarrativeService {
       wordCount: this.countWords(response),
       mood: outline.mood || 'neutral',
       plotProgression: {
-        tensionLevel: outline.tensionLevel || 5,
-        paceLevel: outline.paceLevel || 5,
-        emotionalImpact: outline.emotionalImpact || 5
+        events: ['Chapter progression'],
+        significance: outline.tensionLevel || 5,
+        tension: outline.paceLevel || 5
       }
     }
     
@@ -833,9 +881,9 @@ Write a complete chapter (800-1200 words) that:
       wordCount: this.countWords(content),
       mood: 'neutral',
       plotProgression: {
-        tensionLevel: 5,
-        paceLevel: 5,
-        emotionalImpact: 5
+        events: ['Chapter progression'],
+        significance: 5,
+        tension: 5
       }
     }
   }

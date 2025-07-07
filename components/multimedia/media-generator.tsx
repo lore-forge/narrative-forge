@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+// import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -16,17 +16,17 @@ import {
   Download,
   Play,
   Pause,
-  RotateCcw,
+  // RotateCcw,
   Sparkles,
   Loader2,
-  CheckCircle,
+  // CheckCircle,
   X,
-  Upload,
+  // Upload,
   Wand2,
   Camera,
   Mic,
-  Settings,
-  Palette
+  // Settings,
+  // Palette
 } from 'lucide-react'
 import type { 
   GeneratedImage, 
@@ -50,7 +50,7 @@ interface GenerationState {
 }
 
 export function MediaGenerator({ 
-  context, 
+  context: _context, 
   storyContent,
   onImageGenerated,
   onAudioGenerated 
@@ -125,6 +125,7 @@ export function MediaGenerator({
         prompt: imageRequest.prompt,
         style: imageRequest.style || 'realistic',
         aspectRatio: imageRequest.aspectRatio || '16:9',
+        altText: `Generated image: ${imageRequest.prompt}`,
         generatedAt: new Date(),
         metadata: {
           model: 'dalle-3',
@@ -181,12 +182,24 @@ export function MediaGenerator({
       }
 
       // Mock generated audio
+      const duration = Math.ceil((audioRequest.text?.length || 0) / 10) // Rough estimation
       const generatedAudio: AudioNarration = {
         id: `audio-${Date.now()}`,
+        chapterId: 'mock-chapter-id', // Mock chapter ID
         url: `https://www.soundjay.com/misc/sounds/bell-ringing-05.wav`, // Mock audio URL
+        downloadUrl: `https://www.soundjay.com/misc/sounds/bell-ringing-05.wav`, // Mock download URL
         text: audioRequest.text,
         voice: audioRequest.voice || 'friendly-narrator',
-        duration: Math.ceil((audioRequest.text?.length || 0) / 10), // Rough estimation
+        duration: duration,
+        totalDuration: duration,
+        segments: [
+          {
+            type: 'narration',
+            audioUrl: `https://www.soundjay.com/misc/sounds/bell-ringing-05.wav`,
+            duration: duration,
+            text: audioRequest.text
+          }
+        ],
         generatedAt: new Date(),
         metadata: {
           model: 'eleven-labs',
@@ -631,7 +644,7 @@ export function MediaGenerator({
                                   {audio.duration}s
                                 </Badge>
                                 <Badge variant="outline" className="text-xs">
-                                  {audio.metadata.emotion}
+                                  {audio.metadata?.emotion}
                                 </Badge>
                               </div>
                             </div>

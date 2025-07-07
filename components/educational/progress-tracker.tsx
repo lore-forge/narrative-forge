@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -11,23 +11,18 @@ import {
   Target, 
   BookOpen, 
   PenTool, 
-  Star,
   Award,
   TrendingUp,
   Calendar,
   Brain,
   Heart,
   Lightbulb,
-  CheckCircle,
   Clock,
   BarChart3
 } from 'lucide-react'
 import type { 
   EducationalProgress, 
-  SkillAssessment, 
-  WritingGoal, 
-  Achievement,
-  SkillLevel
+  WritingGoal
 } from '@/types'
 
 interface ProgressTrackerProps {
@@ -45,9 +40,9 @@ interface SkillMetric {
   description: string
 }
 
-export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTrackerProps) {
+export function ProgressTracker({ userId: _userId, progress, onSetGoal: _onSetGoal }: ProgressTrackerProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'all'>('month')
-  const [showGoalDialog, setShowGoalDialog] = useState(false)
+  const [_showGoalDialog, _setShowGoalDialog] = useState(false)
 
   const skillMetrics: SkillMetric[] = [
     {
@@ -92,7 +87,7 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
     }
   ]
 
-  const recentAchievements = progress.achievements.slice(0, 3)
+  const _recentAchievements = progress.achievements.slice(0, 3)
   const currentGoals = progress.goals.filter(goal => goal.status === 'active')
   const completedStories = progress.completedStories.length
   const totalWordsWritten = progress.writingStats.totalWords
@@ -243,7 +238,7 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
                     <Progress 
                       value={skill.current} 
                       className="h-2"
-                      // @ts-ignore
+                      // @ts-expect-error - indicatorClassName prop not in Progress type definition
                       indicatorClassName={getProgressColor(skill.current)}
                     />
                   </div>
@@ -259,28 +254,24 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {progress.assessments.slice(0, 3).map((assessment, index) => (
+                {progress.skillAssessments.slice(0, 3).map((assessment, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded">
                     <div>
-                      <p className="font-medium">{assessment.storyTitle}</p>
+                      <p className="font-medium">Skill Assessment #{index + 1}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(assessment.date).toLocaleDateString()}
+                        {new Date(assessment.assessmentDate).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">
-                          Score: {assessment.overallScore}%
+                          Level: {assessment.overallLevel}
                         </Badge>
-                        <TrendingUp className={`w-4 h-4 ${
-                          assessment.improvement > 0 ? 'text-green-500' : 'text-gray-400'
-                        }`} />
+                        <TrendingUp className="w-4 h-4 text-green-500" />
                       </div>
-                      {assessment.improvement > 0 && (
-                        <p className="text-xs text-green-600">
-                          +{assessment.improvement}% improvement
-                        </p>
-                      )}
+                      <p className="text-xs text-green-600">
+                        {assessment.strengths.length} strengths identified
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -303,7 +294,7 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
                     Set and track your writing objectives
                   </CardDescription>
                 </div>
-                <Button onClick={() => setShowGoalDialog(true)}>
+                <Button onClick={() => _setShowGoalDialog(true)}>
                   <Target className="w-4 h-4 mr-1" />
                   Set Goal
                 </Button>
@@ -335,13 +326,13 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Progress</span>
-                          <span>{goal.progress}/{goal.target} {goal.unit}</span>
+                          <span>{goal.progress ?? goal.current}/{goal.target} {goal.unit ?? 'units'}</span>
                         </div>
-                        <Progress value={(goal.progress / goal.target) * 100} />
+                        <Progress value={((goal.progress ?? goal.current) / goal.target) * 100} />
                         
                         <div className="flex justify-between text-xs text-gray-500">
-                          <span>Deadline: {new Date(goal.deadline).toLocaleDateString()}</span>
-                          <span>{Math.round((goal.progress / goal.target) * 100)}% complete</span>
+                          <span>Deadline: {goal.deadline ? new Date(goal.deadline).toLocaleDateString() : 'No deadline'}</span>
+                          <span>{Math.round(((goal.progress ?? goal.current) / goal.target) * 100)}% complete</span>
                         </div>
                       </div>
                     </div>
@@ -492,7 +483,7 @@ export function ProgressTracker({ userId, progress, onSetGoal }: ProgressTracker
                       This Week
                     </p>
                     <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                      {progress.writingStats.weeklyActivity} sessions
+                      {Object.values(progress.writingStats.weeklyActivity).reduce((sum, count) => sum + count, 0)} sessions
                     </p>
                   </div>
                 </div>

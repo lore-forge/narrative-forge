@@ -160,6 +160,7 @@ export interface ImportedCharacter {
 // AI and Generation types
 export interface StoryGenerationRequest {
   initialPrompt: string
+  title?: string
   genre: Genre
   targetAudience: AudienceLevel
   length: StoryLength
@@ -199,6 +200,7 @@ export interface GeneratedStory {
   generatedAt: Date
   aiModel: string
   processingTime: number
+  estimatedReadTime?: number
 }
 
 export interface GeneratedChapter {
@@ -206,6 +208,7 @@ export interface GeneratedChapter {
   chapterNumber: number
   title: string
   content: string
+  summary?: string
   
   // Generation metadata
   prompt: string
@@ -220,6 +223,7 @@ export interface GeneratedChapter {
   // Multimedia
   images?: SceneImage[]
   audioNarration?: AudioNarration
+  audioUrl?: string
   interactiveElements?: InteractiveElement[]
 }
 
@@ -254,7 +258,32 @@ export interface WritingProgress {
   writingGoals: WritingGoal[]
   achievements: Achievement[]
   lastAssessment: Date
+  
+  // Skills breakdown for progress tracking
+  skills: {
+    vocabulary: number
+    grammar: number
+    creativity: number
+    structure: number
+    characterDevelopment: number
+  }
+  
+  // Writing statistics
+  writingStats: {
+    totalWords: number
+    currentStreak: number
+    longestStreak: number
+    weeklyActivity: Record<string, number>
+    averageSessionMinutes: number
+    dailyActivity: Record<string, number>
+  }
+  
+  // Goals (alias for writingGoals for component compatibility)
+  goals: WritingGoal[]
 }
+
+// Alias for backwards compatibility
+export type EducationalProgress = WritingProgress
 
 // Multimedia types
 export interface GeneratedImage {
@@ -265,6 +294,12 @@ export interface GeneratedImage {
   aspectRatio: string
   altText: string
   generatedAt: Date
+  metadata?: {
+    model: string
+    seed?: number
+    steps?: number
+    guidance?: number
+  }
 }
 
 export interface GeneratedAudio {
@@ -275,6 +310,12 @@ export interface GeneratedAudio {
   emotion: EmotionType
   duration: number
   generatedAt: Date
+  metadata?: {
+    model: string
+    voice_id?: string
+    emotion?: EmotionType
+    speed?: number
+  }
 }
 
 export interface AudioNarration {
@@ -283,6 +324,17 @@ export interface AudioNarration {
   segments: AudioSegment[]
   totalDuration: number
   downloadUrl: string
+  url: string
+  text: string
+  voice: string
+  duration: number
+  generatedAt: Date
+  metadata?: {
+    model: string
+    voice_id?: string
+    emotion?: EmotionType
+    speed?: number
+  }
 }
 
 export interface AudioSegment {
@@ -300,6 +352,7 @@ export interface InteractiveElement {
   type: 'choice' | 'knowledge-check' | 'character-interaction'
   position: number // Position in chapter text
   description: string
+  prompt?: string
   
   choices?: Choice[]
   consequences?: Consequence[]
@@ -323,6 +376,13 @@ export interface Collaborator {
   role: CollaboratorRole
   permissions: Permission[]
   joinedAt: Date
+  avatar?: string
+  isOnline?: boolean
+  lastSeen?: Date
+  cursor?: {
+    position: number
+    color: string
+  }
 }
 
 export interface StoryPermissions {
@@ -544,4 +604,262 @@ export interface ContinuityElement {
   description: string
   established: Date
   references: string[] // Chapter IDs where this is referenced
+}
+
+// Additional missing types
+export interface HistoricalEvent {
+  id: string
+  name: string
+  description: string
+  date: string
+  significance: number
+}
+
+export interface Culture {
+  id: string
+  name: string
+  description: string
+  traditions: string[]
+  values: string[]
+}
+
+export interface Religion {
+  id: string
+  name: string
+  description: string
+  deities: string[]
+  practices: string[]
+}
+
+export interface Language {
+  id: string
+  name: string
+  origin: string
+  speakers: string[]
+  characteristics: string[]
+}
+
+export interface Custom {
+  id: string
+  name: string
+  description: string
+  frequency: string
+  culturalSignificance: number
+}
+
+export interface WorldNPC {
+  id: string
+  name: string
+  description: string
+  role: string
+  location: string
+}
+
+export interface Map {
+  id: string
+  name: string
+  type: string
+  scale: string
+  imageUrl: string
+}
+
+export interface CharacterDevelopment {
+  characterId: string
+  development: string
+  significance: number
+}
+
+export interface PlotProgression {
+  events: string[]
+  significance: number
+  tension: number
+}
+
+export interface SceneImage {
+  id: string
+  url: string
+  description: string
+  altText: string
+  caption?: string
+}
+
+export interface Consequence {
+  id: string
+  description: string
+  impact: number
+}
+
+export interface CharacterImpact {
+  characterId: string
+  impact: string
+  value: number
+}
+
+export interface Permission {
+  action: string
+  allowed: boolean
+}
+
+export interface SkillTarget {
+  skill: string
+  level: number
+}
+
+export interface WritingGoal {
+  id: string
+  title: string
+  description: string
+  target: number
+  current: number
+  status: 'active' | 'completed' | 'paused' | 'cancelled'
+  type?: string
+  progress?: number
+  unit?: string
+  deadline?: Date
+}
+
+export interface Achievement {
+  id: string
+  title: string
+  description: string
+  unlockedAt: Date
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary'
+}
+
+export interface GrammarSkill {
+  level: number
+  areas: string[]
+  suggestions: string[]
+}
+
+export interface NarrativeSkill {
+  level: number
+  strengths: string[]
+  improvements: string[]
+}
+
+export interface CreativitySkill {
+  level: number
+  originality: number
+  imagination: number
+}
+
+export interface PlotElement {
+  id: string
+  type: string
+  description: string
+}
+
+export interface BranchingChoice {
+  id: string
+  text: string
+  consequence: string
+}
+
+export interface KnowledgeCheck {
+  id: string
+  question: string
+  answer: string
+  explanation: string
+}
+
+export interface Scene {
+  id: string
+  title: string
+  description: string
+  characters: string[]
+}
+
+export interface CharacterAction {
+  characterId: string
+  action: string
+  outcome: string
+}
+
+export interface EducationalFeedback {
+  id: string
+  userId: string
+  overallTone: string
+  strengths: string[]
+  improvements: string[]
+  exercises: string[]
+  encouragement: string
+  nextSteps: string[]
+  skillProgression: SkillAssessment
+  generatedAt: Date
+}
+
+export interface CollaborativeSession {
+  id: string
+  storyId: string
+  participants: Collaborator[]
+  isActive: boolean
+  createdAt: Date
+  lastActivity: Date
+}
+
+export interface Comment {
+  id: string
+  authorId: string
+  authorName: string
+  content: string
+  position: number
+  timestamp: Date
+  resolved: boolean
+  userId?: string
+  userName?: string
+  resolvedBy?: string
+  resolvedAt?: Date
+}
+
+export interface Change {
+  id: string
+  authorId: string
+  type: 'insert' | 'delete' | 'format' | 'edit' | 'addition'
+  content: string
+  position: number
+  timestamp: Date
+  userId?: string
+  userName?: string
+  description?: string
+  before?: string
+  after?: string
+}
+
+export type PermissionLevel = 'view' | 'comment' | 'edit' | 'admin'
+
+// AI Generation Request types
+export interface ImageGenerationRequest {
+  prompt: string
+  style: ImageStyle
+  aspectRatio: string
+  quality: 'standard' | 'hd' | 'premium'
+  ageAppropriate: boolean
+  negativePrompt?: string
+  seed?: number
+  steps?: number
+  guidance?: number
+}
+
+export interface AudioGenerationRequest {
+  text: string
+  voice: string
+  speed: number
+  emotion: EmotionType
+  backgroundMusic: boolean
+  language?: string
+  accent?: string
+}
+
+export interface ReaderSettings {
+  fontSize: number
+  fontFamily: string
+  theme: 'light' | 'dark' | 'sepia'
+  backgroundColor: string
+  textColor: string
+  lineHeight: number
+  columnWidth: 'single' | 'double'
+  showProgress: boolean
+  enableAudio: boolean
+  autoBookmark: boolean
 }

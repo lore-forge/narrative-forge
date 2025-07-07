@@ -35,8 +35,7 @@ export function HeroSection() {
       y: [-10, 10, -10],
       transition: {
         duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
+        repeat: Infinity
       }
     }
   }

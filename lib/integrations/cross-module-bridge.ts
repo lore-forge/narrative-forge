@@ -3,10 +3,30 @@ import type {
   StoryCharacter, 
   WorldContext, 
   Adventure,
-  ImportedCharacter,
-  RPGCharacter,
-  WorldBuilderWorld 
+  ImportedCharacter
 } from '@/types'
+
+// Temporary type definitions for cross-module types not yet implemented
+interface RPGCharacter {
+  id: string;
+  name: string;
+  class: string;
+  race: string;
+  level: number;
+  description: string;
+  stats: any;
+  equipment: any;
+  imageUrl?: string;
+  campaign?: string;
+}
+
+interface WorldBuilderWorld {
+  id: string;
+  name: string;
+  description: string;
+  regions: any[];
+  lore: any;
+}
 
 /**
  * Cross-Module Integration Bridge Service
@@ -65,6 +85,7 @@ export class CrossModuleBridge {
             wisdom: data.stats?.wisdom || data.attributes?.wisdom || 10,
             charisma: data.stats?.charisma || data.attributes?.charisma || 10
           },
+          equipment: data.equipment || data.inventory || {},
           imageUrl: data.imageUrl || data.portraitUrl,
           campaign: data.campaign || data.adventureName
         }
@@ -205,16 +226,9 @@ export class CrossModuleBridge {
         const world: WorldBuilderWorld = {
           id: doc.id,
           name: data.name || 'Unnamed World',
-          genre: data.genre || 'fantasy',
           description: data.description || '',
-          status: data.status || 'draft',
-          locationCount: data.locations?.length || 0,
-          npcCount: data.npcs?.length || 0,
-          lorePages: data.lore?.length || 0,
-          imageUrl: data.imageUrl,
-          tags: data.tags || [],
-          createdAt: data.createdAt?.toDate() || new Date(),
-          lastModified: data.lastModified?.toDate() || new Date()
+          regions: data.regions || data.locations || [],
+          lore: data.lore || {}
         }
 
         worlds.push(world)
@@ -479,7 +493,7 @@ export class CrossModuleBridge {
     }
   }
 
-  private determineNarrativeRole(rpgData: any): string {
+  private determineNarrativeRole(rpgData: any): import('@/types').NarrativeRole {
     const level = rpgData.level || 1
     const charisma = rpgData.stats?.charisma || rpgData.attributes?.charisma || 10
     
@@ -637,36 +651,4 @@ export class CrossModuleBridge {
 export const crossModuleBridge = CrossModuleBridge.getInstance()
 
 // Types for cross-module integration
-interface RPGCharacter {
-  id: string
-  name: string
-  class: string
-  race: string
-  level: number
-  description: string
-  stats: {
-    strength: number
-    dexterity: number
-    constitution: number
-    intelligence: number
-    wisdom: number
-    charisma: number
-  }
-  imageUrl?: string
-  campaign?: string
-}
-
-interface WorldBuilderWorld {
-  id: string
-  name: string
-  genre: string
-  description: string
-  status: 'active' | 'draft' | 'archived'
-  locationCount: number
-  npcCount: number
-  lorePages: number
-  imageUrl?: string
-  tags: string[]
-  createdAt: Date
-  lastModified: Date
-}
+// Interface definitions moved to top of file to avoid duplicates

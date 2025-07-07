@@ -17,9 +17,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['firebase-admin'],
-  },
+  serverExternalPackages: ['firebase-admin'],
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
