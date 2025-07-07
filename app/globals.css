@@ -1,0 +1,285 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Narrative Forge specific styles */
+@layer components {
+  /* Story Editor Styles */
+  .story-editor {
+    @apply min-h-[400px] rounded-lg border border-border bg-background p-6;
+  }
+
+  .story-editor .ProseMirror {
+    @apply min-h-[400px] focus:outline-none;
+    font-family: var(--font-crimson);
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+
+  .story-editor .ProseMirror p {
+    @apply mb-4;
+  }
+
+  .story-editor .ProseMirror h1 {
+    @apply text-3xl font-bold mb-6 text-narrative-700 dark:text-narrative-300;
+    font-family: var(--font-libre);
+  }
+
+  .story-editor .ProseMirror h2 {
+    @apply text-2xl font-semibold mb-4 text-narrative-600 dark:text-narrative-400;
+    font-family: var(--font-libre);
+  }
+
+  .story-editor .ProseMirror h3 {
+    @apply text-xl font-medium mb-3 text-narrative-600 dark:text-narrative-400;
+  }
+
+  /* Chapter Display Styles */
+  .chapter-content {
+    @apply prose prose-lg dark:prose-invert max-w-none;
+    font-family: var(--font-crimson);
+  }
+
+  .chapter-content h1 {
+    @apply text-4xl font-bold mb-8 text-center text-narrative-800 dark:text-narrative-200;
+    font-family: var(--font-libre);
+  }
+
+  .chapter-content h2 {
+    @apply text-2xl font-semibold mb-6 text-narrative-700 dark:text-narrative-300;
+    font-family: var(--font-libre);
+  }
+
+  .chapter-content p {
+    @apply mb-6 text-justify leading-8;
+    text-indent: 1.5rem;
+  }
+
+  .chapter-content blockquote {
+    @apply border-l-4 border-narrative-400 pl-6 italic text-narrative-600 dark:text-narrative-400;
+  }
+
+  /* Story Navigation */
+  .story-nav {
+    @apply sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border;
+  }
+
+  /* AI Assistant Styles */
+  .ai-assistant {
+    @apply fixed bottom-4 right-4 z-50;
+  }
+
+  .ai-thinking {
+    @apply inline-flex items-center gap-1;
+  }
+
+  .ai-thinking-dot {
+    @apply w-2 h-2 bg-narrative-500 rounded-full animate-ai-thinking;
+  }
+
+  .ai-thinking-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .ai-thinking-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  /* Story Card Styles */
+  .story-card {
+    @apply group relative overflow-hidden rounded-lg border border-border bg-card text-card-foreground transition-all duration-300 hover:shadow-lg hover:scale-[1.02];
+  }
+
+  .story-card-gradient {
+    @apply absolute inset-0 bg-gradient-to-br from-narrative-500/10 via-story-500/5 to-chapter-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100;
+  }
+
+  /* Interactive Elements */
+  .choice-button {
+    @apply w-full rounded-lg border border-narrative-300 bg-narrative-50 p-4 text-left transition-all duration-200 hover:bg-narrative-100 hover:border-narrative-400 dark:border-narrative-600 dark:bg-narrative-900 dark:hover:bg-narrative-800;
+  }
+
+  .choice-button:hover {
+    @apply shadow-md transform translate-y-[-2px];
+  }
+
+  /* Educational Progress */
+  .skill-meter {
+    @apply h-2 bg-secondary rounded-full overflow-hidden;
+  }
+
+  .skill-meter-fill {
+    @apply h-full bg-gradient-to-r from-story-400 to-narrative-500 transition-all duration-500 ease-out;
+  }
+
+  /* Reading Experience */
+  .reading-mode {
+    @apply max-w-4xl mx-auto px-8 py-12;
+    font-family: var(--font-crimson);
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+
+  .reading-mode p {
+    @apply mb-6;
+    text-indent: 2rem;
+  }
+
+  .reading-mode p:first-child {
+    @apply text-2xl leading-relaxed mb-8;
+    text-indent: 0;
+  }
+
+  /* Multimedia Integration */
+  .story-image {
+    @apply rounded-lg shadow-lg my-8 mx-auto max-w-full;
+  }
+
+  .story-audio-player {
+    @apply bg-gradient-to-r from-narrative-50 to-story-50 dark:from-narrative-900 dark:to-story-900 rounded-lg p-4 my-6;
+  }
+
+  /* Collaboration Indicators */
+  .collaborator-cursor {
+    @apply absolute pointer-events-none z-50;
+  }
+
+  .collaborator-cursor::after {
+    content: attr(data-name);
+    @apply absolute top-full left-0 bg-narrative-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .story-editor .ProseMirror {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .chapter-content {
+      @apply prose-base;
+    }
+
+    .reading-mode {
+      @apply px-4 py-8;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .reading-mode p {
+      text-indent: 1rem;
+    }
+  }
+}
+
+/* Custom scrollbar for story content */
+.story-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--narrative-400)) rgb(var(--background));
+}
+
+.story-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.story-content::-webkit-scrollbar-track {
+  background: rgb(var(--background));
+}
+
+.story-content::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--narrative-400));
+  border-radius: 4px;
+}
+
+.story-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--narrative-500));
+}
+
+/* Animation for story generation */
+@keyframes story-generation {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.story-generation-animation {
+  animation: story-generation 0.8s ease-out;
+}
+
+/* Dark mode adjustments */
+.dark .story-editor {
+  @apply bg-card;
+}
+
+.dark .story-card {
+  @apply shadow-narrative-900/20;
+}
+
+.dark .story-card:hover {
+  @apply shadow-narrative-900/40;
+}
